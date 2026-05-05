@@ -14,7 +14,6 @@ LANGUAGES = {
     "it": "Italiano", "tr": "Türkçe", "zh": "中文",
     "ja": "日本語", "ko": "한국어", "hi": "हिन्दी",
     "pt": "Português", "fa": "فارسی", "ur": "اردو",
-    "nl": "Nederlands", "pl": "Polski", "sv": "Svenska", "uk": "Українська",
 }
 
 user_states = {}
@@ -30,7 +29,7 @@ def get_keyboard(prefix):
     return InlineKeyboardMarkup(keyboard)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(f"مرحبا {update.effective_user.first_name}!\n\nانا TarjimAI مترجمك الذكي.\n\nارسل اي نص وانا اترجمه لك فورا!")
+    await update.message.reply_text("مرحبا! انا TarjimAI مترجمك الذكي.\n\nارسل اي نص وانا اترجمه لك!")
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -44,7 +43,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = query.from_user.id
     data = query.data
     if user_id not in user_states:
-        await query.edit_message_text("انتهت الجلسة، ارسل النص من جديد.")
+        await query.edit_message_text("ارسل النص من جديد.")
         return
     state = user_states[user_id]
     if data.startswith("src:"):
@@ -57,7 +56,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         state["target"] = lang_code
         src_name = LANGUAGES.get(state["source"], state["source"])
         tgt_name = LANGUAGES.get(lang_code, lang_code)
-        await query.edit_message_text(f"جاري الترجمة من {src_name} الى {tgt_name}...")
+        await query.edit_message_text(f"جاري الترجمة...")
         try:
             response = client.messages.create(
                 model="claude-sonnet-4-20250514",
@@ -65,9 +64,9 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 messages=[{"role": "user", "content": f"ترجم من {src_name} الى {tgt_name} بشكل طبيعي وعامي. اعط الترجمة فقط:\n\n{state['text']}"}]
             )
             translation = response.content[0].text.strip()
-            await query.edit_message_text(f"الترجمة جاهزة!\n\nمن: {src_name}\nالى: {tgt_name}\n\nالاصل:\n{state['text']}\n\nالترجمة:\n{translation}")
-        except:
-            await query.edit_message_text("حدث خطأ، حاول مجددا.")
+            await query.edit_message_text(f"من: {src_name} ➡️ {tgt_name}\n\nالاصل:\n{state['text']}\n\nالترجمة:\n{translation}")
+        except Exception as e:
+            await query.edit_message_text(f"حدث خطأ: {str(e)}")
         if user_id in user_states:
             del user_states[user_id]
 
@@ -79,5 +78,5 @@ def main():
     print("TarjimAI Bot يشتغل...")
     app.run_polling(drop_pending_updates=True)
 
-if __name__ == "__main__":
+if name == "__main__":
     main()
