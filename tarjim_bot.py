@@ -1,9 +1,10 @@
+import os
 import anthropic
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
 
-TELEGRAM_TOKEN = "8651997587:AAGdXhtZ0IAsQgRFhkkve_XMiAutC03K2RE"
-ANTHROPIC_API_KEY = "sk-ant-api03-SZD_P4XuY_WDWaf3d3wRcjARGPZuY0Gk3qHNW7y1SSeUGZFnXo5oeOOLqGO321Bs7stJ82OOiR-tiP6S552hWg-OqGlwQAA"
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
