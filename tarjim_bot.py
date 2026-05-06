@@ -71,12 +71,32 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             del user_states[user_id]
 
 def main():
+    if not TELEGRAM_TOKEN:
+        raise Exception("Missing TELEGRAM_TOKEN")
+    if not ANTHROPIC_API_KEY:
+        raise Exception("Missing ANTHROPIC_API_KEY")
+
+    PORT = int(os.environ.get("PORT", 10000))
+    WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
+
+    if not WEBHOOK_URL:
+        raise Exception("Missing WEBHOOK_URL")
+
     app = Application.builder().token(TELEGRAM_TOKEN).build()
+
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     app.add_handler(CallbackQueryHandler(handle_callback))
-    print("TarjimAI Bot يشتغل...")
-    app.run_polling(drop_pending_updates=True)
 
-if name == "__main__":
+    print("TarjimAI Bot يشتغل Webhook...")
+
+    app.run_webhook(
+        listen="0.0.0.0",
+        port=PORT,
+        url_path=TELEGRAM_TOKEN,
+        webhook_url=f"{WEBHOOK_URL}/{TELEGRAM_TOKEN}",
+        drop_pending_updates=True
+    )
+
+if __name__ == "__main__":
     main()
